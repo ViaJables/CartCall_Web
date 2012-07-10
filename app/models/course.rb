@@ -12,5 +12,4 @@ class Course < ActiveRecord::Base
     Call.call(self)
   end
   
-  
 end
