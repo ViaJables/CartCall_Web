@@ -2,6 +2,15 @@ CartCallWeb::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
+  resources :course
+  # Required Params: latitude, longitude as floating point
+  match '/course/find/closest' => 'course#get_course', :as => 'find_courses'
+  # Required Params: latitude, longitude as floating point && course_id as integer
+  match '/course/summon/cart' => 'course#summon_cart', :as => 'summon_cart'
+  
+  resources :golfer
+  match '/golfer/update/location' => 'golfer#update_location'
+
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
@@ -48,7 +57,7 @@ CartCallWeb::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  # root :to => 'welcome#index'
+  root :to => 'index#index'
 
   # See how all your routes lay out with "rake routes"
 

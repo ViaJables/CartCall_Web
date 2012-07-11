@@ -2,11 +2,20 @@ source 'https://rubygems.org'
 
 #### ACTIVE GEMS ####
 gem 'rails'
-gem 'sqlite3'
 gem "geocoder"
 gem 'capistrano'
 gem 'jquery-rails'
 gem 'devise'
+
+group :production do
+  # gems specifically for Heroku go here
+  #gem 'pg'
+end
+
+group :development do
+  #gems for local
+  gem 'mysql2'
+end
 
 # Gems used only for assets and not required
 # in production environments by default.

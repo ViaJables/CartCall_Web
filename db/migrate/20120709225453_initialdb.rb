@@ -1,22 +1,26 @@
 class Initialdb < ActiveRecord::Migration
   def change
-    create_table :course do |t|
+    create_table :courses do |t|
       t.string :name
+      t.string :pin
       t.float :latitude
       t.float :longitude
+      t.timestamps
     end
     
-    create_table :call do |t|
-      t.boolean :served, :default => false
+    create_table :calls do |t|
+      t.datetime :served
+      t.datetime :on_my_way
       t.float :latitude
       t.float :longitude
-      t.reference :course
+      t.references :course
+      t.timestamps
     end
     
-    create_table :cart do |t|
-      t.reference :course
-      t.float :latitude
-      t.float :longitude
+    create_table :carts do |t|
+      t.string :name
+      t.references :course
+      t.timestamps
     end
     
   end
