@@ -7,8 +7,8 @@ class GolferController < ApplicationController
     longitude = params[:longitude]
     cid = params[:call_id]
     
-    if c.blank? ? return : course = Course.find(v)
-    if latitude.blank? || longitude.blank? || cid.blank? ? return : true
+    c.blank? ? return : course = Course.find(v)
+    latitude.blank? || longitude.blank? || cid.blank? ? return : true
   end
   
 end
