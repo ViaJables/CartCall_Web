@@ -1,13 +1,22 @@
 %li{"data-course_id"=>course.id}
   %h3= course.name
-  %ul.summons
-    = render :partial => "/admin/partials/summon", :collection => course.summons
+  %table.table.table-striped.table-bordered.summons
+    %thead
+      %tr
+        %th ID
+        %th Latitude
+        %th Longitude
+        %th Created At
+        %th Updated At
+        %th Options
+    %tbody
+      = render :partial => "/admin/partials/summon", :collection => course.summons
 :javascript
   var channel_#{course.id} = pusher_connect.subscribe('#{course.id}_carts');
   channel_#{course.id}.bind('summon_cart', function(data) {
     console.log(data);
-    new_summon = '<li class="summon" data-summon_id="'+data.id+'"><span>'+data.id+'</span><span clas="lat">'+data.latitude+'</span><span class="long">'+data.longitude+'</span><span>'+data.created_at+'</span><span>'+data.updated_at+'</span><span><a href="/course/summon/'+data.id+'/accept/" class="btn">I am on my way!</a></span>';
-    $(new_summon).appendTo('[data-course_id="'+data.course_id+'"] .summons');
+    new_summon = '<tr class="summon" data-summon_id="'+data.id+'"><td>'+data.id+'</td><td clas="lat">'+data.latitude+'</td><td class="long">'+data.longitude+'</td><td>'+data.created_at+'</td><td>'+data.updated_at+'</td><td><a href="/course/summon/'+data.id+'/accept/" class="btn">I am on my way!</a></td></tr>';
+    $(new_summon).appendTo('[data-course_id="'+data.course_id+'"] .summons tbody').effect("highlight", {}, 5000);
   });
   channel_#{course.id}.bind('accept_summon', function(data) {
     console.log(data);

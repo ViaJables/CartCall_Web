@@ -11,3 +11,7 @@
  *= require_self
  *= require_tree .
  */
+ 
+ul.summons {
+    span { display: inline-block; min-width: 80px; margin-right: 20px; }
+}

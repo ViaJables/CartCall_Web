@@ -1,12 +1,12 @@
-%li{"data-summon_id"=>summon.id}
-  %span= summon.id
-  %span.lat= summon.latitude
-  %span.long= summon.longitude
-  %span= summon.created_at
-  %span= summon.updated_at
+%tr{"data-summon_id"=>summon.id}
+  %td= summon.id
+  %td.lat= summon.latitude
+  %td.long= summon.longitude
+  %td= summon.created_at
+  %td= summon.updated_at
   - if summon.on_my_way.nil?
-    %span= link_to "I am on my way!", accept_summon_path(summon), :class => "btn"
+    %td= link_to "I am on my way!", accept_summon_path(summon), :class => "btn"
   - elsif summon.served.nil?
-    %span= link_to "Mark as served!", serve_summon_path(summon), :class => "btn"
+    %td= link_to "Mark as served!", serve_summon_path(summon), :class => "btn"
   - else
-    %span Served!
+    %td Served!
