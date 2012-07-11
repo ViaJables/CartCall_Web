@@ -4,8 +4,8 @@ class CourseController < ApplicationController
     latitude = params[:latitude]
     longitude = params[:longitude]
     c = Course.get_nearby_courses(latitude, longitude, 1)
-    if c.nil?
-      render :json => {:status => 'invalid_location'}
+    if c.blank?
+      render :json => {:status => 'no_locations_found'}
     else
       render :json => {:status => 'success', :result => c.as_json}
     end
@@ -24,7 +24,7 @@ class CourseController < ApplicationController
     #summon the cart
     call = course.notify_carts(latitude, longitude)
     
-    if call
+    if call.blank?
       render :json => {:status => 'error'}
     else
       render :json => {:status => 'success', :result => call.as_json}
