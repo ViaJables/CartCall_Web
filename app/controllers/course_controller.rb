@@ -18,8 +18,8 @@ class CourseController < ApplicationController
     longitude = params[:longitude]
     
     #check for values
-    if c.blank? ? return : course = Course.find(c) #set course
-    if latitude.blank? || longitude.blank? ? return : true
+    c.blank? ? return : course = Course.find(c) #set course
+    latitude.blank? || longitude.blank? ? return false : true
     
     #summon the cart
     call = course.notify_carts(latitude, longitude)
