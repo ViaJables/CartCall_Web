@@ -4,7 +4,7 @@ CartCallWeb::Application.routes.draw do
 
   resources :course
   # Required Params: latitude, longitude as floating point
-  match '/course/find/closest' => 'course#get_course', :as => 'find_courses'
+  match '/course/find/closest' => 'course#find_course', :as => 'find_courses'
   # Required Params: latitude, longitude as floating point && course_id as integer
   match '/course/summon/cart' => 'course#summon_cart', :as => 'summon_cart'
   
