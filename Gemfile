@@ -6,6 +6,8 @@ gem "geocoder"
 gem 'capistrano'
 gem 'jquery-rails'
 gem 'devise'
+gem 'pusher'
+
 
 group :development do
   #gems for local

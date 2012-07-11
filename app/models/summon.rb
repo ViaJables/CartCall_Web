@@ -1,4 +1,4 @@
-class Call < ActiveRecord::Base
+class Summon < ActiveRecord::Base
   belongs_to :course
   
   #attributes
@@ -8,19 +8,21 @@ class Call < ActiveRecord::Base
     
   def self.notify(course, lat, long)
     # Create Unique Token for Golfer (just the id of the call for now), Save & Return
-    return Call.create(:course => course, :latitude => lat, :longitude => long)
+    c = Summon.create(:course => course)
+    c.update_position(lat, long)
+    return c
   end
   
-  def start(lat, long)
+  def update_position(lat, long)
     self.update_attributes(:latitude => lat, :longitude => long)
   end
   
-  def update(lat, long)
-    self.update_attributes(:latitude => lat, :longitude => long)
+  def accept
+    self.update_attributes(:on_my_way => Time.now)
   end
   
-  def complete
-    self.update_attributes(:served => true)
+  def serve
+    self.update_attributes(:served => Time.now)
   end
   
   def send_cart_location

@@ -1,6 +1,6 @@
 class Course < ActiveRecord::Base
   #associations
-  has_many :calls
+  has_many :summons
   has_many :carts
   
   #attributes
@@ -11,7 +11,7 @@ class Course < ActiveRecord::Base
   reverse_geocoded_by :latitude, :longitude
   
   def notify_carts(lat, long)
-    return Call.notify(self, lat, long)
+    return Summon.notify(self, lat, long)
   end
   
   def self.get_nearby_courses(lat, long, dist)

@@ -6,7 +6,11 @@ CartCallWeb::Application.routes.draw do
   # Required Params: latitude, longitude as floating point
   match '/course/find/closest' => 'course#find_course', :as => 'find_courses'
   # Required Params: latitude, longitude as floating point && course_id as integer
-  match '/course/summon/cart' => 'course#summon_cart', :as => 'summon_cart'
+  match '/course/summon/request' => 'course#summon_cart', :as => 'summon_cart'
+  # Required Params: summon_id
+  match '/course/summon/accept' => 'course#accept_summon', :as => 'accept_summon'
+  # Required Params: summon_id
+  match '/course/summon/serve' => 'course#serve_summon', :as => 'serve_summon'
   
   resources :golfer
   match '/golfer/update/location' => 'golfer#update_location'

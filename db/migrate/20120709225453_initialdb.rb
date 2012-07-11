@@ -8,7 +8,7 @@ class Initialdb < ActiveRecord::Migration
       t.timestamps
     end
     
-    create_table :calls do |t|
+    create_table :summons do |t|
       t.datetime :served
       t.datetime :on_my_way
       t.float :latitude

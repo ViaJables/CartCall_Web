@@ -13,24 +13,30 @@
 
 ActiveRecord::Schema.define(:version => 20120709225453) do
 
-  create_table "calls", :force => true do |t|
+  create_table "carts", :force => true do |t|
+    t.string   "name"
+    t.integer  "course_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "courses", :force => true do |t|
+    t.string   "name"
+    t.string   "pin"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "summons", :force => true do |t|
     t.datetime "served"
     t.datetime "on_my_way"
     t.float    "latitude"
     t.float    "longitude"
     t.integer  "course_id"
-  end
-
-  create_table "carts", :force => true do |t|
-    t.string  "name"
-    t.integer "course_id"
-  end
-
-  create_table "courses", :force => true do |t|
-    t.string "name"
-    t.string "pin"
-    t.float  "latitude"
-    t.float  "longitude"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
 end
