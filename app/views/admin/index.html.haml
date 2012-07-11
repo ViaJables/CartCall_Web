@@ -1,0 +1,19 @@
+%h1 Admin Area
+%ul.courses
+  = render :partial => "/admin/partials/course", :collection => @courses
+:javascript
+  $(document).ready(function(){
+    $('.btn').live("click",function(){
+      $.ajax({
+        type: "POST",
+        url: $(this).attr("href"),
+        context: $(this).parent().parent(),
+        cache: false,
+        error: function(h){
+          //Fail: Alert User, Ask to Try Again
+          alert("Oops, we received an error!");
+        }
+      });
+      return false;
+    });
+  });

@@ -8,12 +8,17 @@ CartCallWeb::Application.routes.draw do
   # Required Params: latitude, longitude as floating point && course_id as integer
   match '/course/summon/request' => 'course#summon_cart', :as => 'summon_cart'
   # Required Params: summon_id
-  match '/course/summon/accept' => 'course#accept_summon', :as => 'accept_summon'
+  post '/course/summon/accept' => 'course#accept_summon'
+  match '/course/summon/:summon_id/accept' => 'course#accept_summon', :as => 'accept_summon'
   # Required Params: summon_id
-  match '/course/summon/serve' => 'course#serve_summon', :as => 'serve_summon'
+  post '/course/summon/serve' => 'course#serve_summon'
+  match '/course/summon/:summon_id/serve' => 'course#serve_summon', :as => 'serve_summon'
   
   resources :golfer
-  match '/golfer/update/location' => 'golfer#update_location'
+  match '/golfer/update/position' => 'golfer#update_position'
+  
+  resources :admin
+  match '/admin' => 'admin#index'
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'

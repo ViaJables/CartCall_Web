@@ -28,7 +28,7 @@ class CourseController < ApplicationController
       render :json => {:status => 'error'}
     else
       render :json => {:status => 'success', :result => call.as_json}
-      Pusher["#{course.id}_carts"].trigger('new_request', call.as_json)
+      Pusher["#{course.id}_carts"].trigger('summon_cart', call.as_json)
     end
   end
   
@@ -37,7 +37,7 @@ class CourseController < ApplicationController
     s = params[:summon_id]
     
     #check for values
-    s.blank? ? return : s = Summon.find(c) #set summon
+    s.blank? ? return : s = Summon.find(s) #set summon
     
     #flag summon as accepted
     result = s.accept
@@ -45,7 +45,7 @@ class CourseController < ApplicationController
     if result.blank?
       render :json => {:status => 'error'}
     else
-      render :json => {:status => 'success', :result => result.as_json}
+      render :json => {:status => 'success', :result => result.as_json, :summon => s.as_json}
       Pusher["#{s.course_id}_carts"].trigger('accept_summon', :result => result.as_json, :summon => s.as_json)
       Pusher["#{s.id}_summon_feed"].trigger('accept_summon', :result => result.as_json, :summon => s.as_json)
     end
@@ -56,7 +56,7 @@ class CourseController < ApplicationController
     s = params[:summon_id]
     
     #check for values
-    s.blank? ? return : s = Summon.find(c) #set summon
+    s.blank? ? return : s = Summon.find(s) #set summon
     
     #flag summon as accepted
     result = s.serve
@@ -64,7 +64,7 @@ class CourseController < ApplicationController
     if result.blank?
       render :json => {:status => 'error'}
     else
-      render :json => {:status => 'success', :result => result.as_json}
+      render :json => {:status => 'success', :result => result.as_json, :summon => s.as_json}
       Pusher["#{s.course_id}_carts"].trigger('serve_summon', :result => result.as_json, :summon => s.as_json)
       Pusher["#{s.id}_summon_feed"].trigger('serve_summon', :result => result.as_json, :summon => s.as_json)
     end
