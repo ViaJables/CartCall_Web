@@ -19,7 +19,7 @@ class CourseController < ApplicationController
     
     #check for values
     c.blank? ? return : course = Course.find(c) #set course
-    latitude.blank? || longitude.blank? ? return false : true
+    latitude.blank? || longitude.blank? ? return : true
     
     #summon the cart
     call = course.notify_carts(latitude, longitude)
