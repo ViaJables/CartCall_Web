@@ -3,23 +3,23 @@
   %ul.summons
     = render :partial => "/admin/partials/summon", :collection => course.summons
 :javascript
-  var channel = pusher_connect.subscribe('#{course.id}_carts');
-  channel.bind('summon_cart', function(data) {
+  var channel_#{course.id} = pusher_connect.subscribe('#{course.id}_carts');
+  channel_#{course.id}.bind('summon_cart', function(data) {
     console.log(data);
     new_summon = '<li class="summon" data-summon_id="'+data.id+'"><span>'+data.id+'</span><span clas="lat">'+data.latitude+'</span><span class="long">'+data.longitude+'</span><span>'+data.created_at+'</span><span>'+data.updated_at+'</span><span><a href="/course/summon/'+data.id+'/accept/" class="btn">I am on my way!</a></span>';
-    $(new_summon).appendTo('.summons');
+    $(new_summon).appendTo('[data-course_id="'+data.course_id+'"] .summons');
   });
-  channel.bind('accept_summon', function(data) {
+  channel_#{course.id}.bind('accept_summon', function(data) {
     console.log(data);
     context = $('[data-course_id="'+data.summon.course_id+'"] [data-summon_id="'+data.summon.id+'"]');
     $(context).find('.btn').text("Mark as served!").attr("href", "/course/summon/"+data.summon.id+"/serve");
   });
-  channel.bind('serve_summon', function(data) {
+  channel_#{course.id}.bind('serve_summon', function(data) {
     console.log(data);
     context = $('[data-course_id="'+data.summon.course_id+'"] [data-summon_id="'+data.summon.id+'"]');
     $(context).find('.btn').replaceWith("Served!");
   });
-  channel.bind('update_summon', function(data) {
+  channel_#{course.id}.bind('update_summon', function(data) {
     console.log(data);
     context = $('[data-course_id="'+data.summon.course_id+'"] [data-summon_id="'+data.summon.id+'"]');
     $(context).find('.lat').text(data.summon.latitude);
