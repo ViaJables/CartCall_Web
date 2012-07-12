@@ -15,6 +15,7 @@
   var sendTimeout = false;
   var currentSummonId;
   var currentCourseId;
+  var displayCartLocation;
   $(document).ready(function(){
     $('.btnSummonCart').click(function(){
       $.ajax({
@@ -43,6 +44,11 @@
                 $('.btnSummonCart').fadeIn(500);
               }).text("We've set in your request. Waiting to hear back.").removeClass("served");
               sendUpdates = false;
+            });
+            summon_feed.bind('cart_location', function(data) {
+              console.log(data);
+              data = { "coords": { "latitude" : data.cart.latitude, "longitude" : data.cart.longitude }}
+              displayCartLocation(data);
             });
         },
         error: function(h){
@@ -194,6 +200,38 @@
       // or let other geolocation capable browsers to get their static position
       } else if ( navigator.geolocation ) {
         navigator.geolocation.getCurrentPosition( displayLocation, handleError );
+      }
+      var cartMarker;
+      displayCartLocation = function( position ) {
+        // create a new LatLng object for every position update
+        cLatLng = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );
+
+        // build entire marker first time thru
+        if ( !cartMarker ) {
+          // define our custom marker image
+          var image = new google.maps.MarkerImage(
+            '/orangedot_retina.png',
+            null, // size
+            null, // origin
+            new google.maps.Point( 8, 8 ), // anchor (move to center of marker)
+            new google.maps.Size( 17, 17 ) // scaled size (required for Retina display icon)
+          );
+
+          // then create the new marker
+          cartMarker = new google.maps.Marker({
+            flat: true,
+            icon: image,
+            map: map,
+            optimized: false,
+            position: cLatLng,
+            title: 'Cart Location',
+            visible: true
+          });
+
+        // just change marker position on subsequent passes
+        } else {
+          cartMarker.setPosition( cLatLng );
+        }
       }
     }
   };

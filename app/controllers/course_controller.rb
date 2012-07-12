@@ -132,5 +132,23 @@ class CourseController < ApplicationController
     end
   end
   
+  def update_cart_location
+    latitude = params[:latitude]
+    longitude = params[:longitude]
+    s_id = params[:summon_id]
+    
+    s_id.blank? ? return : s = Summon.find(s_id)
+    latitude.blank? || longitude.blank? ? return : true
+    
+    #update the summons location
+    s.blank? ? return : result = Cart.update_position(latitude, longitude, s)
+    
+    if result == false
+      render :json => {:status => 'error'}
+    else
+      render :json => {:status => 'success'}
+    end
+  end
+  
   
 end

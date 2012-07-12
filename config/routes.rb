@@ -20,6 +20,7 @@ CartCallWeb::Application.routes.draw do
   #Required Params: course_pin as integer
   post '/course/cart/login' => 'course#login'
   post '/course/cart/get/summons' => 'course#get_summons'
+  post '/course/cart/update/position' => 'course#update_cart_location'
   
   resources :golfer
   match '/golfer/update/position' => 'golfer#update_position'
