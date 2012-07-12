@@ -3,7 +3,7 @@ class CourseController < ApplicationController
   def find_course
     latitude = params[:latitude]
     longitude = params[:longitude]
-    c = Course.get_nearby_courses(latitude, longitude, 1)
+    c = Course.get_nearby_courses(latitude, longitude, 500)
     if c.blank?
       render :json => {:status => 'no_locations_found'}
     else

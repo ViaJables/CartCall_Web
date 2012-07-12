@@ -53,28 +53,10 @@
           } else {
             myMarker.setPosition( myLatLng );
             // Update Current Call Locaton if Exists
-            if (sendUpdates == true){
-              sendCoordinates( myLatLng );
-            }
           }
 
           // center map view on every pass
           map.setCenter( myLatLng );
-        },
-        sendCoordinates = function ( position ) {
-          $.ajax({
-            type: "POST",
-            url: "/golfer/update/position",
-            data: "summon_id="+currentSummonId+"&latitude="+position.Ra+"&longitude="+position.Sa,
-            cache: false,
-            success: function(r){
-              console.log("Saved new coordinates");
-            },
-            error: function(h){
-              //Fail: Alert User, Ask to Try Again
-              alert("Oops, we received an error updating location!");
-            }
-          });
         },
         handleError = function( error ) {
           var errorMessage = [ 
