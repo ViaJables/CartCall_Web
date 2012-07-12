@@ -6,10 +6,5 @@
     = javascript_include_tag "application", "http://maps.googleapis.com/maps/api/js?v=3.4&key=AIzaSyBaBWcm616ZLX6i0eigvF5k-HkBWhjjaPQ&sensor=true"
     = csrf_meta_tags
     %meta{:content => "width=device-width, initial-scale=1.0, user-scalable=no", :name => "viewport"}
-    :javascript
-      $(document).ready(function(){
-        golfer.map();
-      });
-  %body
-    .container.mapContainer
-      = yield
+  %body{:onload => "golfer.map()"}
+    = yield
