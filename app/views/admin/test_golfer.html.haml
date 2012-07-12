@@ -1,1 +1,144 @@
 #map_canvas
+%a#request_canvas.btnStyle.orange.btnSummonCart{:href => "/course/summon/request"} Summon Hot Babes
+#request_status{:style => "display: none"} We've sent in your request. Waiting to hear back.
+:javascript
+  var sendUpdates = false;
+  var currentSummonId;
+  $(document).ready(function(){
+    $('.btnSummonCart').click(function(){
+      $.ajax({
+        type: "POST",
+        url: $(this).attr("href"),
+        data: "course_id=1&latitude="+myLatLng.Ra+"&longitude="+myLatLng.Sa,
+        context: $(this),
+        cache: false,
+        success: function(r){
+          console.log(r);
+          $(this).fadeOut(500, function(){
+            $('#request_status').fadeIn(500);
+          });
+          sendUpdates = true;
+          currentSummonId = r.result.id;
+          var summon_feed = pusher_connect.subscribe(r.result.id+'_summon_feed');
+           summon_feed.bind('accept_summon', function(data) {
+              console.log(data);
+              context = $('#request_status');
+              $(context).text("A sexy lady is on her way!").addClass("served");
+            });
+           summon_feed.bind('serve_summon', function(data) {
+              console.log(data);
+              context = $('#request_status');
+              $(context).fadeOut(500, function(){
+                $('.btnSummonCart').fadeIn(500);
+              }).text("We've set in your request. Waiting to hear back.").removeClass("served");
+              sendUpdates = false;
+            });
+        },
+        error: function(h){
+          //Fail: Alert User, Ask to Try Again
+          alert("Oops, we received an error!");
+        }
+      });
+      return false;
+    });
+  });
+  var myLatLng;
+  window.golfer = window.golfer || {
+    map: function() {
+      var  // get the page's canvas container
+        mapCanvas = document.getElementById('map_canvas'),
+        // define the Google Maps options
+        map_options = {
+          zoom: 15,
+          // let's initially center on downtown Austin
+          center: new google.maps.LatLng( 30.264664, -97.747378 ),
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        },
+        // then create the map
+        map = new google.maps.Map( mapCanvas, map_options ),
+
+        myMarker = 0,
+        displayLocation = function( position ) {
+          // create a new LatLng object for every position update
+          myLatLng = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );
+
+          // build entire marker first time thru
+          if ( !myMarker ) {
+            // define our custom marker image
+            var image = new google.maps.MarkerImage(
+              'bluedot_retina.png',
+              null, // size
+              null, // origin
+              new google.maps.Point( 8, 8 ), // anchor (move to center of marker)
+              new google.maps.Size( 17, 17 ) // scaled size (required for Retina display icon)
+            );
+
+            // then create the new marker
+            myMarker = new google.maps.Marker({
+              flat: true,
+              icon: image,
+              map: map,
+              optimized: false,
+              position: myLatLng,
+              title: 'Your Location',
+              visible: true
+            });
+
+          // just change marker position on subsequent passes
+          } else {
+            myMarker.setPosition( myLatLng );
+            // Update Current Call Locaton if Exists
+            if (sendUpdates == true){
+              sendCoordinates( myLatLng );
+            }
+          }
+
+          // center map view on every pass
+          map.setCenter( myLatLng );
+        },
+        sendCoordinates = function ( position ) {
+          $.ajax({
+            type: "POST",
+            url: "/golfer/update/position",
+            data: "summon_id=1&latitude="+position.Ra+"&longitude="+position.Sa,
+            cache: false,
+            success: function(r){
+              console.log("Saved new coordinates");
+            },
+            error: function(h){
+              //Fail: Alert User, Ask to Try Again
+              alert("Oops, we received an error updating location!");
+            }
+          });
+        },
+        handleError = function( error ) {
+          var errorMessage = [ 
+            'We are not quite sure what happened.',
+            'Sorry. Permission to find your location has been denied.',
+            'Sorry. Your position could not be determined.',
+            'Sorry. Timed out.'
+          ];
+
+          alert( errorMessage[ error.code ] );
+        },
+        // cache the userAgent
+        useragent = navigator.userAgent;
+
+      // allow iPhone or Android to track movement
+      if ( useragent.indexOf('iPhone') !== -1 || useragent.indexOf('Android') !== -1 ) {
+        navigator.geolocation.watchPosition( 
+          displayLocation, 
+          handleError, 
+          { 
+            enableHighAccuracy: true, 
+            maximumAge: 30000, 
+            timeout: 27000 
+          }
+        );      
+
+      // or let other geolocation capable browsers to get their static position
+      } else if ( navigator.geolocation ) {
+        navigator.geolocation.getCurrentPosition( displayLocation, handleError );
+      }
+    }
+  };
