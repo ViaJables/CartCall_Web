@@ -83,13 +83,54 @@ class CourseController < ApplicationController
     result = s.serve
     
     if result.blank?
-      render :json => {:status => 'error'}
+      if request.xhr?
+        render :json => {:status => 'error'}
+      else
+        redirect_to "/cart"
+      end
     else
-      render :json => {:status => 'success', :result => result.as_json, :summon => s.as_json}
+      if request.xhr?
+        render :json => {:status => 'success', :result => result.as_json, :summon => s.as_json}
+      else
+        redirect_to "/cart"
+      end
       # Tell Cart Ladies What's Going Down
       Pusher["#{s.course_id}_carts"].trigger('serve_summon', :result => result.as_json, :summon => s.as_json)
       # Tell the Golfer What's Going Down
       Pusher["#{s.id}_summon_feed"].trigger('serve_summon', :result => result.as_json, :summon => s.as_json)
     end
   end
+  
+  ####################
+  # Cart Admin Calls #
+  ####################
+  
+  def login
+    course_pin = params[:course_pin]
+    
+    #check for values
+    course_pin.blank? ? return : c = Course.find_by_pin(course_pin)
+    
+    if c.blank?
+      render :json => {:status => 'invalid_pin'}
+    else
+      render :json => {:status => 'success', :result => c.as_json}
+    end
+  end
+  
+  def get_summons
+    course_id = params[:course_id]
+    
+    #check for values
+    course_id.blank? ? return : c = Course.find(course_id)
+    
+    if c.blank?
+      render :json => {:status => 'invalid_course'}
+    else
+      s = c.summons.where(:served => nil)
+      render :json => {:status => 'success', :result => s.as_json}
+    end
+  end
+  
+  
 end

@@ -1,48 +1,91 @@
 #map_canvas
-#bottom_canvas
-  #finding_courses
-    Finding courses around you.
-  #select_course{:style => "display: none"}
-    Select your course.
-    %select{:placeholder => "Select your course"}
-      %option{:value => ""} Courses near you
-  #selected_course{:style => "display: none"}
-  #request_status{:style => "display: none"} We've sent in your request. Waiting to hear back.
-  %a#request_canvas.btnStyle.orange.btnSummonCart{:href => "/course/summon/request", :style => "display: none"} Summon Hot Babes
+#middle_canvas
+  #login_to_course
+    %input.course_pin{:name => "course_pin", :placeholder => "Enter your pin number"}
+    %br/
+    %a.btnStyle.orange.btnLogin{:href => "/course/cart/login"} Login
+#bottom_canvas{:style => "display: none"}
+  #explanation
+  %ul#summon_requests
+    
 :javascript
   var sendUpdates = false;
   var sendTimeout = false;
   var currentSummonId;
   var currentCourseId;
   $(document).ready(function(){
-    $('.btnSummonCart').click(function(){
+    $('.btnLogin').click(function(){
       $.ajax({
         type: "POST",
         url: $(this).attr("href"),
-        data: "course_id="+currentCourseId+"&latitude="+myLatLng.Ra+"&longitude="+myLatLng.Sa,
-        context: $(this),
+        data: "course_pin="+$('.course_pin').attr("value"),
+        context: $('#middle_canvas'),
         cache: false,
         success: function(r){
           console.log(r);
-          $(this).fadeOut(500, function(){
-            $('#request_status').fadeIn(500);
-          });
-          sendUpdates = true;
-          currentSummonId = r.result.id;
-          var summon_feed = pusher_connect.subscribe(r.result.id+'_summon_feed');
-           summon_feed.bind('accept_summon', function(data) {
-              console.log(data);
-              context = $('#request_status');
-              $(context).text("A sexy lady is on her way!").addClass("served");
+          if ("success" == r.status){
+            $(this).fadeOut(500, function(){
+              $('#explanation').text("You are working on "+r.result.name);
+              $('#bottom_canvas').fadeIn(500);
             });
-           summon_feed.bind('serve_summon', function(data) {
-              console.log(data);
-              context = $('#request_status');
-              $(context).fadeOut(500, function(){
-                $('.btnSummonCart').fadeIn(500);
-              }).text("We've set in your request. Waiting to hear back.").removeClass("served");
-              sendUpdates = false;
+            currentCourseId = r.result.id;
+            
+            // Get Initial Summons
+            
+            $.ajax({
+              type: "POST",
+              url: '/course/cart/get/summons',
+              data: "course_id="+currentCourseId,
+              context: $('#summon_requests'),
+              cache: false,
+              success: function(r){
+                console.log("Results");
+                console.log(r);
+                for (x in r.result){
+                  console.log(r.result[x]);
+                  if (r.result[x].on_my_way == null){
+                    $('#summon_requests').append("<li data-summon_id='"+r.result[x].id+"'> Request #"+r.result[x].id+" <a href='/course/summon/view/"+r.result[x].id+"/map/' class='btnStyle orange btnSummon'>I am on my way!</a></li>");
+                  } else {
+                    $('#summon_requests').append("<li class='answered' data-summon_id='"+r.result[x].id+"'> Request #"+r.result[x].id+" <a href='/course/summon/view/"+r.result[x].id+"/map/' class='btnStyle orange btnSummon'>I am also on my way!</a></li>");
+                  }
+                }
+              }
             });
+            
+            // Summon Listeners for Cart
+            var cart_channel = pusher_connect.subscribe(currentCourseId+'_carts');
+              cart_channel.bind('summon_cart', function(data) {
+                $("<li data-summon_id='"+data.id+"'> Request #"+data.id+" <a href='/course/summon/view/"+data.id+"/map/' class='btnStyle orange btnSummon'>I am on my way!</a></li>").hide().appendTo('#summon_requests').slideDown(500, function(){
+                  $(this).fadeTo(500,1, function(){
+                    alert("You have a new request!");
+                  });
+                });
+              });
+              cart_channel.bind('accept_summon', function(data) {
+                console.log(data);
+                context = $('[data-summon_id="'+data.summon.id+'"]');
+                $(context).addClass("answered").find('.btnSummon').text("I am also on my way!");
+              });
+              cart_channel.bind('serve_summon', function(data) {
+                console.log(data);
+                context = $('[data-summon_id="'+data.summon.id+'"]');
+                $(context).find('.btnSummon').replaceWith(" has been served!");
+                setTimeout(function(){ $(context).fadeTo(500, 0, function(){
+                  $(this).slideUp(500, function(){
+                    $(this).remove();
+                  });
+                }); }, 5000);
+              });
+              //cart_channel.bind('update_summon', function(data) {
+              //  console.log(data);
+              //  context = $('[data-course_id="'+data.summon.course_id+'"] [data-summon_id="'+data.summon.id+'"]');
+              //  $(context).find('.lat').text(data.summon.latitude);
+              //  $(context).find('.long').text(data.summon.longitude);
+              //});
+          } else {
+            console.log("fail");
+          }
+          
         },
         error: function(h){
           //Fail: Alert User, Ask to Try Again
@@ -143,7 +186,7 @@
             if (sendUpdates == true && sendTimeout == false){
               sendCoordinates( myLatLng );
               sendTimeout = true;
-              setTimeout("eraseSendTimeout()", 10000);
+              setTimeout(function(){ sendTimeout = false; }, 10000);
             }
           }
 
@@ -165,13 +208,10 @@
             }
           });
         },
-        eraseSendTimeout = function () {
-          sendTimeout = false;
-        },
         handleError = function( error ) {
           var errorMessage = [ 
             'We are not quite sure what happened.',
-            'Sorry. Permission to find your location has been denied.',
+            'Doh! We need your location to use this app and you denied us :(',
             'Sorry. Your position could not be determined.',
             'Sorry. Timed out.'
           ];

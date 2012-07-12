@@ -1,13 +1,21 @@
 #map_canvas.cart_canvas
+#bottom_canvas
+  #explanation You are the orange dot, your customer is the blue dot
+  = link_to "Mark Completed & Return", serve_summon_path(@summon), :class => "btnStyle orange btnReturn", :id => "request_canvas"
 :javascript
-  var sendUpdates = false;
   var currentSummonId;
+  var myLatLng;
   $(document).ready(function(){
-    $('.btnSummonCart').click(function(){
-      return false;
+    $.ajax({
+      type: "POST",
+      url: '#{accept_summon_path(@summon)}',
+      cache: false,
+      error: function(h){
+        //Fail: Alert User, Ask to Try Again
+        alert("Oops, we received an error!");
+      }
     });
   });
-  var myLatLng;
   window.golfer = window.golfer || {
     map: function() {
       var  // get the page's canvas container
@@ -23,6 +31,7 @@
         map = new google.maps.Map( mapCanvas, map_options ),
 
         myMarker = 0,
+        customerMarker = 0,
         displayLocation = function( position ) {
           // create a new LatLng object for every position update
           myLatLng = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );
@@ -31,7 +40,7 @@
           if ( !myMarker ) {
             // define our custom marker image
             var image = new google.maps.MarkerImage(
-              '/bluedot_retina.png',
+              '/orangedot_retina.png',
               null, // size
               null, // origin
               new google.maps.Point( 8, 8 ), // anchor (move to center of marker)
@@ -45,18 +54,49 @@
               map: map,
               optimized: false,
               position: myLatLng,
-              title: 'Your Location',
+              title: 'Cart Location',
               visible: true
             });
 
           // just change marker position on subsequent passes
           } else {
             myMarker.setPosition( myLatLng );
-            // Update Current Call Locaton if Exists
+          }
+
+        },
+        displayCustomerLocation = function( position ) {
+          // create a new LatLng object for every position update
+          cLatLng = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );
+
+          // build entire marker first time thru
+          if ( !customerMarker ) {
+            // define our custom marker image
+            var image = new google.maps.MarkerImage(
+              '/bluedot_retina.png',
+              null, // size
+              null, // origin
+              new google.maps.Point( 8, 8 ), // anchor (move to center of marker)
+              new google.maps.Size( 17, 17 ) // scaled size (required for Retina display icon)
+            );
+
+            // then create the new marker
+            customerMarker = new google.maps.Marker({
+              flat: true,
+              icon: image,
+              map: map,
+              optimized: false,
+              position: cLatLng,
+              title: 'Your Location',
+              visible: true
+            });
+
+          // just change marker position on subsequent passes
+          } else {
+            customerMarker.setPosition( cLatLng );
           }
 
           // center map view on every pass
-          map.setCenter( myLatLng );
+          map.setCenter( cLatLng );
         },
         handleError = function( error ) {
           var errorMessage = [ 
@@ -70,15 +110,35 @@
         }
         
         data = { "coords": { "latitude" : #{@summon.latitude}, "longitude" : #{@summon.longitude} }}
-        displayLocation(data);
+        displayCustomerLocation(data);
             
         var summon_feed = pusher_connect.subscribe(#{@summon.course_id}+'_carts');
         summon_feed.bind('update_summon', function(data) {
           if (data.summon.id == #{@summon.id}){
             data = { "coords": { "latitude" : data.summon.latitude, "longitude" : data.summon.longitude }}
-            displayLocation(data);
+            displayCustomerLocation(data);
           }
         });
+      
+        // cache the userAgent
+        useragent = navigator.userAgent;
+        
+      // allow iPhone or Android to track movement
+      if ( useragent.indexOf('iPhone') !== -1 || useragent.indexOf('Android') !== -1 ) {
+        navigator.geolocation.watchPosition( 
+          displayLocation, 
+          handleError, 
+          { 
+            enableHighAccuracy: true, 
+            maximumAge: 30000, 
+            timeout: 27000 
+          }
+        );      
+
+      // or let other geolocation capable browsers to get their static position
+      } else if ( navigator.geolocation ) {
+        navigator.geolocation.getCurrentPosition( displayLocation, handleError );
+      }
       
     }
   };

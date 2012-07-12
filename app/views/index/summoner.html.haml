@@ -1,0 +1,199 @@
+#map_canvas
+#bottom_canvas
+  #finding_courses
+    Finding courses around you.
+  #select_course{:style => "display: none"}
+    Select the course you're on
+    %br/
+    %select{:placeholder => "Select your course"}
+      %option{:value => ""} Courses near you
+  #selected_course{:style => "display: none"}
+  #request_status{:style => "display: none"} We've sent in your request. Waiting to hear back.
+  %a#request_canvas.btnStyle.orange.btnSummonCart{:href => "/course/summon/request", :style => "display: none"} Summon Hot Babes
+:javascript
+  var sendUpdates = false;
+  var sendTimeout = false;
+  var currentSummonId;
+  var currentCourseId;
+  $(document).ready(function(){
+    $('.btnSummonCart').click(function(){
+      $.ajax({
+        type: "POST",
+        url: $(this).attr("href"),
+        data: "course_id="+currentCourseId+"&latitude="+myLatLng.Ra+"&longitude="+myLatLng.Sa,
+        context: $(this),
+        cache: false,
+        success: function(r){
+          console.log(r);
+          $(this).fadeOut(500, function(){
+            $('#request_status').fadeIn(500);
+          });
+          sendUpdates = true;
+          currentSummonId = r.result.id;
+          var summon_feed = pusher_connect.subscribe(r.result.id+'_summon_feed');
+           summon_feed.bind('accept_summon', function(data) {
+              console.log(data);
+              context = $('#request_status');
+              $(context).text("A sexy lady is on her way!").addClass("served");
+            });
+           summon_feed.bind('serve_summon', function(data) {
+              console.log(data);
+              context = $('#request_status');
+              $(context).fadeOut(500, function(){
+                $('.btnSummonCart').fadeIn(500);
+              }).text("We've set in your request. Waiting to hear back.").removeClass("served");
+              sendUpdates = false;
+            });
+        },
+        error: function(h){
+          //Fail: Alert User, Ask to Try Again
+          alert("Oops, we received an error!");
+        }
+      });
+      return false;
+    });
+  });
+  var myLatLng;
+  window.golfer = window.golfer || {
+    map: function() {
+      var  // get the page's canvas container
+        mapCanvas = document.getElementById('map_canvas'),
+        // define the Google Maps options
+        map_options = {
+          zoom: 15,
+          // let's initially center on downtown Austin
+          center: new google.maps.LatLng( 30.264664, -97.747378 ),
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        },
+        // then create the map
+        map = new google.maps.Map( mapCanvas, map_options ),
+
+        myMarker = 0,
+        displayLocation = function( position ) {
+          // create a new LatLng object for every position update
+          myLatLng = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );
+
+          // build entire marker first time thru
+          if ( !myMarker ) {
+            // define our custom marker image
+            var image = new google.maps.MarkerImage(
+              '/bluedot_retina.png',
+              null, // size
+              null, // origin
+              new google.maps.Point( 8, 8 ), // anchor (move to center of marker)
+              new google.maps.Size( 17, 17 ) // scaled size (required for Retina display icon)
+            );
+            
+            $.ajax({
+              url: '/course/find/closest?latitude=' + position.coords.latitude + '&longitude=' + position.coords.longitude,
+              method: 'GET',
+              success: function(data) {
+                console.log(data);
+                if ("no_locations_found" == data.status) {
+                  console.log("No Course");
+                  $('#finding_courses').text("Doh, we didn't find any courses using PrimeCart. Maybe you should mention us to the bar manager.")
+                } 
+                else if ("success" == data.status && data.result.length == 1) {
+                  console.log("One Course");
+                  currentCourseId = data.result[0].id;
+                  $('#finding_courses').fadeOut(500,function(){
+                    $('#selected_course').text('You are playing at ' + data.result[0].name).fadeIn(500);
+                    $('#request_canvas').fadeIn(500);
+                  });
+                }
+                else if ("success" == data.status && data.result.length > 1) {
+                  console.log("Multiple Courses");
+                  $('#select_course select').children().attr("value", data.result[0].id);
+                  for (x in data.result){
+                    console.log(data.result[x]);
+                    $('#select_course select').append("<option value='"+data.result[x].id+"' data-course_name='"+data.result[x].name+"'>"+data.result[x].name+"</option>");
+                  }
+                  $('#finding_courses').fadeOut(500,function(){
+                    $('#select_course').fadeIn(500);
+                  });
+                  $('#select_course select').change(function(){
+                    selected = $(this).find('option:selected');
+                    currentCourseId = $(this).attr("value");
+                    $('#select_course').fadeOut(500,function(){
+                      $('#selected_course').text('You are playing at ' + selected.data("course_name")).fadeIn(500);
+                      $('#request_canvas').fadeIn(500);
+                    });
+                  });
+                }
+                else {
+                  console.log("Unknown error");
+                }
+              }
+            });
+
+            // then create the new marker
+            myMarker = new google.maps.Marker({
+              flat: true,
+              icon: image,
+              map: map,
+              optimized: false,
+              position: myLatLng,
+              title: 'Your Location',
+              visible: true
+            });
+
+          // just change marker position on subsequent passes
+          } else {
+            myMarker.setPosition( myLatLng );
+            // Update Current Call Locaton if Exists
+            if (sendUpdates == true && sendTimeout == false){
+              sendCoordinates( myLatLng );
+              sendTimeout = true;
+              setTimeout(function(){ sendTimeout = false; }, 10000);
+            }
+          }
+
+          // center map view on every pass
+          map.setCenter( myLatLng );
+        },
+        sendCoordinates = function ( position ) {
+          $.ajax({
+            type: "POST",
+            url: "/golfer/update/position",
+            data: "summon_id="+currentSummonId+"&latitude="+position.Ra+"&longitude="+position.Sa,
+            cache: false,
+            success: function(r){
+              console.log("Saved new coordinates");
+            },
+            error: function(h){
+              //Fail: Alert User, Ask to Try Again
+              console.log("Oops, we received an error updating location!");
+            }
+          });
+        },
+        handleError = function( error ) {
+          var errorMessage = [ 
+            'We are not quite sure what happened.',
+            'Doh! We need your location to use this app and you denied us :(',
+            'Sorry. Your position could not be determined.',
+            'Sorry. Timed out.'
+          ];
+
+          alert( errorMessage[ error.code ] );
+        },
+        // cache the userAgent
+        useragent = navigator.userAgent;
+
+      // allow iPhone or Android to track movement
+      if ( useragent.indexOf('iPhone') !== -1 || useragent.indexOf('Android') !== -1 ) {
+        navigator.geolocation.watchPosition( 
+          displayLocation, 
+          handleError, 
+          { 
+            enableHighAccuracy: true, 
+            maximumAge: 30000, 
+            timeout: 27000 
+          }
+        );      
+
+      // or let other geolocation capable browsers to get their static position
+      } else if ( navigator.geolocation ) {
+        navigator.geolocation.getCurrentPosition( displayLocation, handleError );
+      }
+    }
+  };

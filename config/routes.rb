@@ -17,13 +17,20 @@ CartCallWeb::Application.routes.draw do
   post '/course/summon/serve' => 'course#serve_summon'
   match '/course/summon/:summon_id/serve' => 'course#serve_summon', :as => 'serve_summon'
   
+  #Required Params: course_pin as integer
+  post '/course/cart/login' => 'course#login'
+  post '/course/cart/get/summons' => 'course#get_summons'
+  
   resources :golfer
   match '/golfer/update/position' => 'golfer#update_position'
-  match '/course/summon/view/:summon_id/map' => 'admin#test_cart', :as => "view_summon"
+  match '/course/summon/view/:summon_id/map' => 'index#view_summoner_on_map', :as => "view_summon"
   
   resources :admin
   match '/admin' => 'admin#index'
   match '/pusher/webhooks' => 'admin#webhooks'
+  
+  resources :index
+  match '/cart' => 'index#cart_view'
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
@@ -71,7 +78,7 @@ CartCallWeb::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  root :to => 'admin#test_golfer'
+  root :to => 'index#summoner_view'
 
   # See how all your routes lay out with "rake routes"
 
