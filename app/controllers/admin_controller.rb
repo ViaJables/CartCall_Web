@@ -35,4 +35,8 @@ class AdminController < ApplicationController
     end
   end
   
+  def test_golfer
+    render "/admin/test_golfer", :layout => "front_end"
+  end
+  
 end
