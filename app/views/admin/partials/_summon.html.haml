@@ -4,9 +4,11 @@
   %td.long= summon.longitude
   %td= summon.created_at
   %td= summon.updated_at
-  - if summon.on_my_way.nil?
-    %td= link_to "I am on my way!", accept_summon_path(summon), :class => "btn"
-  - elsif summon.served.nil?
-    %td= link_to "Mark as served!", serve_summon_path(summon), :class => "btn"
-  - else
-    %td Served!
+  %td
+    - if summon.on_my_way.nil?
+      = link_to "I am on my way!", accept_summon_path(summon), :class => "btn"
+    - elsif summon.served.nil?
+      = link_to "Mark as served!", serve_summon_path(summon), :class => "btn"
+    - else
+      Served!
+    = link_to "View on map", view_summon_path(summon), :class => ""

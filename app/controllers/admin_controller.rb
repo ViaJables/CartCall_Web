@@ -39,4 +39,9 @@ class AdminController < ApplicationController
     render "/admin/test_golfer", :layout => "front_end"
   end
   
+  def test_cart
+    @summon = Summon.find(params[:summon_id])
+    render "/admin/test_cart", :layout => "front_end"
+  end
+  
 end

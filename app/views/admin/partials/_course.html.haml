@@ -15,7 +15,7 @@
   var channel_#{course.id} = pusher_connect.subscribe('#{course.id}_carts');
   channel_#{course.id}.bind('summon_cart', function(data) {
     console.log(data);
-    new_summon = '<tr class="summon" data-summon_id="'+data.id+'"><td>'+data.id+'</td><td clas="lat">'+data.latitude+'</td><td class="long">'+data.longitude+'</td><td>'+data.created_at+'</td><td>'+data.updated_at+'</td><td><a href="/course/summon/'+data.id+'/accept/" class="btn">I am on my way!</a></td></tr>';
+    new_summon = '<tr class="summon" data-summon_id="'+data.id+'"><td>'+data.id+'</td><td clas="lat">'+data.latitude+'</td><td class="long">'+data.longitude+'</td><td>'+data.created_at+'</td><td>'+data.updated_at+'</td><td><a href="/course/summon/'+data.id+'/accept/" class="btn">I am on my way!</a><a href="/course/summon/view/'+data.id+'/map/">I am on my way!</a></td></tr>';
     $(new_summon).appendTo('[data-course_id="'+data.course_id+'"] .summons tbody').effect("highlight", {}, 5000);
   });
   channel_#{course.id}.bind('accept_summon', function(data) {

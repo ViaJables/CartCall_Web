@@ -19,6 +19,7 @@ CartCallWeb::Application.routes.draw do
   
   resources :golfer
   match '/golfer/update/position' => 'golfer#update_position'
+  match '/course/summon/view/:summon_id/map' => 'admin#test_cart', :as => "view_summon"
   
   resources :admin
   match '/admin' => 'admin#index'

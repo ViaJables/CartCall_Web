@@ -1,44 +1,9 @@
-#map_canvas
-%a#request_canvas.btnStyle.orange.btnSummonCart{:href => "/course/summon/request"} Summon Hot Babes
-#request_status{:style => "display: none"} We've sent in your request. Waiting to hear back.
+#map_canvas.cart_canvas
 :javascript
   var sendUpdates = false;
   var currentSummonId;
   $(document).ready(function(){
     $('.btnSummonCart').click(function(){
-      $.ajax({
-        type: "POST",
-        url: $(this).attr("href"),
-        data: "course_id=1&latitude="+myLatLng.Ra+"&longitude="+myLatLng.Sa,
-        context: $(this),
-        cache: false,
-        success: function(r){
-          console.log(r);
-          $(this).fadeOut(500, function(){
-            $('#request_status').fadeIn(500);
-          });
-          sendUpdates = true;
-          currentSummonId = r.result.id;
-          var summon_feed = pusher_connect.subscribe(r.result.id+'_summon_feed');
-           summon_feed.bind('accept_summon', function(data) {
-              console.log(data);
-              context = $('#request_status');
-              $(context).text("A sexy lady is on her way!").addClass("served");
-            });
-           summon_feed.bind('serve_summon', function(data) {
-              console.log(data);
-              context = $('#request_status');
-              $(context).fadeOut(500, function(){
-                $('.btnSummonCart').fadeIn(500);
-              }).text("We've set in your request. Waiting to hear back.").removeClass("served");
-              sendUpdates = false;
-            });
-        },
-        error: function(h){
-          //Fail: Alert User, Ask to Try Again
-          alert("Oops, we received an error!");
-        }
-      });
       return false;
     });
   });
@@ -120,25 +85,18 @@
           ];
 
           alert( errorMessage[ error.code ] );
-        },
-        // cache the userAgent
-        useragent = navigator.userAgent;
-
-      // allow iPhone or Android to track movement
-      if ( useragent.indexOf('iPhone') !== -1 || useragent.indexOf('Android') !== -1 ) {
-        navigator.geolocation.watchPosition( 
-          displayLocation, 
-          handleError, 
-          { 
-            enableHighAccuracy: true, 
-            maximumAge: 30000, 
-            timeout: 27000 
+        }
+        
+        data = { "coords": { "latitude" : #{@summon.latitude}, "longitude" : #{@summon.longitude} }}
+        displayLocation(data);
+            
+        var summon_feed = pusher_connect.subscribe(#{@summon.course_id}+'_carts');
+        summon_feed.bind('update_summon', function(data) {
+          if (data.summon.id == #{@summon.id}){
+            data = { "coords": { "latitude" : data.summon.latitude, "longitude" : data.summon.longitude }}
+            displayLocation(data);
           }
-        );      
-
-      // or let other geolocation capable browsers to get their static position
-      } else if ( navigator.geolocation ) {
-        navigator.geolocation.getCurrentPosition( displayLocation, handleError );
-      }
+        });
+      
     }
   };
