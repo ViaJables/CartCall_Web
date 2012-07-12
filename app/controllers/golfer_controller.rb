@@ -18,7 +18,6 @@ class GolferController < ApplicationController
       render :json => {:status => 'success', :result => result.as_json, :summon => s.as_json}
       Pusher["#{s.course_id}_carts"].trigger('update_summon', :result => result.as_json, :summon => s.as_json)
     end
-    
   end
   
 end

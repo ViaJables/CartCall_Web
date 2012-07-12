@@ -18,4 +18,8 @@ class Course < ActiveRecord::Base
     return Course.near([lat, long], dist)
   end
   
+  def check_for_active_carts
+    return self.active_carts
+  end
+  
 end

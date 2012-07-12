@@ -5,6 +5,9 @@ CartCallWeb::Application.routes.draw do
   resources :course
   # Required Params: latitude, longitude as floating point
   match '/course/find/closest' => 'course#find_course', :as => 'find_courses'
+  # Required Params: course_id as integer
+  post '/course/availability' => 'course#availability'
+  match '/course/:course_id/availability' => 'course#availability', :as => 'availability'
   # Required Params: latitude, longitude as floating point && course_id as integer
   match '/course/summon/request' => 'course#summon_cart', :as => 'summon_cart'
   # Required Params: summon_id
@@ -19,6 +22,7 @@ CartCallWeb::Application.routes.draw do
   
   resources :admin
   match '/admin' => 'admin#index'
+  match '/pusher/webhooks' => 'admin#webhooks'
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'

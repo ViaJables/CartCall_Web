@@ -5,4 +5,8 @@ class Cart < ActiveRecord::Base
     
   end
   
+  def check_for_active_carts(course)
+    
+  end
+  
 end

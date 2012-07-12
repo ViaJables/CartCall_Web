@@ -13,6 +13,9 @@
       = render :partial => "/admin/partials/summon", :collection => course.summons
 :javascript
   var channel_#{course.id} = pusher_connect.subscribe('#{course.id}_carts');
+  channel_#{course.id}.bind('pusher:pong', function(data) {
+    console.log("I received a ping");
+  });
   channel_#{course.id}.bind('summon_cart', function(data) {
     console.log(data);
     new_summon = '<tr class="summon" data-summon_id="'+data.id+'"><td>'+data.id+'</td><td clas="lat">'+data.latitude+'</td><td class="long">'+data.longitude+'</td><td>'+data.created_at+'</td><td>'+data.updated_at+'</td><td><a href="/course/summon/'+data.id+'/accept/" class="btn">I am on my way!</a></td></tr>';
