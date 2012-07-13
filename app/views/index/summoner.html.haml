@@ -16,6 +16,7 @@
   var currentSummonId;
   var currentCourseId;
   var displayCartLocation;
+  var cartMarker;
   $(document).ready(function(){
     $('.btnSummonCart').click(function(){
       $.ajax({
@@ -35,7 +36,12 @@
            summon_feed.bind('accept_summon', function(data) {
               console.log(data);
               context = $('#request_status');
-              $(context).text("A sexy lady is on her way!").addClass("served");
+              $(context).text("A sexy lady is on her way!").addClass("served");              
+              summon_feed.bind('cart_location', function(data) {
+                console.log(data);
+                data = { "coords": { "latitude" : data.cart.latitude, "longitude" : data.cart.longitude }}
+                displayCartLocation(data);
+              });
             });
            summon_feed.bind('serve_summon', function(data) {
               console.log(data);
@@ -44,11 +50,8 @@
                 $('.btnSummonCart').fadeIn(500);
               }).text("We've set in your request. Waiting to hear back.").removeClass("served");
               sendUpdates = false;
-            });
-            summon_feed.bind('cart_location', function(data) {
-              console.log(data);
-              data = { "coords": { "latitude" : data.cart.latitude, "longitude" : data.cart.longitude }}
-              displayCartLocation(data);
+              summon_feed.unbind('cart_location');
+              cartMarker.setMap(null);
             });
         },
         error: function(h){
@@ -201,7 +204,6 @@
       } else if ( navigator.geolocation ) {
         navigator.geolocation.getCurrentPosition( displayLocation, handleError );
       }
-      var cartMarker;
       displayCartLocation = function( position ) {
         // create a new LatLng object for every position update
         cLatLng = new google.maps.LatLng( position.coords.latitude, position.coords.longitude );

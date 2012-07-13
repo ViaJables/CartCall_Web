@@ -1,8 +1,9 @@
 class Summon < ActiveRecord::Base
   belongs_to :course
+  has_one :cart
   
   #attributes
-  attr_accessible :latitude, :longitude, :served, :on_my_way, :course
+  attr_accessible :latitude, :longitude, :served, :on_my_way, :course, :cart_id, :cart
   #validators
   validates_presence_of :latitude, :longitude, :course
     
@@ -17,8 +18,8 @@ class Summon < ActiveRecord::Base
     self.update_attributes(:latitude => lat, :longitude => long)
   end
   
-  def accept
-    self.update_attributes(:on_my_way => Time.now)
+  def accept(cart)
+    self.update_attributes(:on_my_way => Time.now, :cart_id => cart)
   end
   
   def serve

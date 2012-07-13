@@ -10,6 +10,7 @@
     $.ajax({
       type: "POST",
       url: '#{accept_summon_path(@summon)}',
+      data: "cart_id=#{@cart_information}",
       cache: false,
       error: function(h){
         //Fail: Alert User, Ask to Try Again
@@ -109,7 +110,7 @@
           $.ajax({
             type: "POST",
             url: "/course/cart/update/position",
-            data: "summon_id="+#{@summon.id}+"&latitude="+position.Ra+"&longitude="+position.Sa,
+            data: "summon_id="+#{@summon.id}+"&latitude="+position.Ra+"&longitude="+position.Sa+"&cart_id=#{@cart_information}",
             cache: false,
             success: function(r){
               console.log("Saved new coordinates");

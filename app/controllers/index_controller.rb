@@ -1,4 +1,6 @@
 class IndexController < ApplicationController
+  before_filter :cart_cookie, :only => [ :cart_view, :view_summoner_on_map ]
+  
   def index
     render :nothing => true
   end

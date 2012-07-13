@@ -54,12 +54,13 @@ class CourseController < ApplicationController
   def accept_summon
     #params
     s = params[:summon_id]
+    c = params[:cart_id]
     
     #check for values
-    s.blank? ? return : s = Summon.find(s) #set summon
+    s.blank? || c.blank? ? return : s = Summon.find(s) #set summon
     
     #flag summon as accepted
-    result = s.accept
+    result = s.accept(c)
     
     if result.blank?
       render :json => {:status => 'error'}
@@ -86,13 +87,13 @@ class CourseController < ApplicationController
       if request.xhr?
         render :json => {:status => 'error'}
       else
-        redirect_to "/cart"
+        redirect_to "/cart", :course_id => s.course_id, :logged_in => true
       end
     else
       if request.xhr?
         render :json => {:status => 'success', :result => result.as_json, :summon => s.as_json}
       else
-        redirect_to "/cart"
+        redirect_to "/cart", :course_id => s.course_id, :logged_in => true
       end
       # Tell Cart Ladies What's Going Down
       Pusher["#{s.course_id}_carts"].trigger('serve_summon', :result => result.as_json, :summon => s.as_json)
@@ -107,14 +108,19 @@ class CourseController < ApplicationController
   
   def login
     course_pin = params[:course_pin]
+    cart_id = params[:cart_id]
     
     #check for values
-    course_pin.blank? ? return : c = Course.find_by_pin(course_pin)
+    course_pin.blank? || cart_id.blank? ? return : c = Course.find_by_pin(course_pin)
     
+    #check cart for course information
+    cart = Cart.find(cart_id)
+    cart.course.nil? ? cart.update_attribute(:course, c) : true
+        
     if c.blank?
       render :json => {:status => 'invalid_pin'}
     else
-      render :json => {:status => 'success', :result => c.as_json}
+      render :json => {:status => 'success', :result => c.as_json, :cart => cart.as_json }
     end
   end
   
@@ -136,12 +142,13 @@ class CourseController < ApplicationController
     latitude = params[:latitude]
     longitude = params[:longitude]
     s_id = params[:summon_id]
+    cart_id = params[:cart_id]
     
     s_id.blank? ? return : s = Summon.find(s_id)
-    latitude.blank? || longitude.blank? ? return : true
+    latitude.blank? || longitude.blank? || cart_id.blank? ? return : cart = Cart.find(cart_id)
     
     #update the summons location
-    s.blank? ? return : result = Cart.update_position(latitude, longitude, s)
+    s.blank? ? return : result = Cart.update_position(latitude, longitude, s, cart)
     
     if result == false
       render :json => {:status => 'error'}
