@@ -10,6 +10,7 @@
 :javascript
   var currentSummonId;
   var sendTimeout = false;
+  var timeoutWarning;
   var myLatLng;
   $(document).ready(function(){
     $.ajax({
@@ -148,12 +149,14 @@
         displayCustomerLocation(data);
             
         var summon_feed = pusher_connect.subscribe(#{@summon.course_id}+'_carts');
+        timeoutWarning = setTimeout(function(){ $('#explanation.warning').fadeIn(500); }, 180000);
         summon_feed.bind('update_summon', function(data) {
           if (data.summon.id == #{@summon.id}){
             data = { "coords": { "latitude" : data.summon.latitude, "longitude" : data.summon.longitude }}
             displayCustomerLocation(data);
             $('#explanation.warning').fadeOut(500);
-            setTimeout(function(){ $('#explanation.warning').fadeIn(500); }, 180000);
+            clearTimeout(timeoutWarning);
+            timeoutWarning = setTimeout(function(){ $('#explanation.warning').fadeIn(500); }, 180000);
           }
         });
       
