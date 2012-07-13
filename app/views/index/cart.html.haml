@@ -7,13 +7,13 @@
 #bottom_canvas{:style => "display: none"}
   #explanation
   %ul#summon_requests
-- if params[:logged_in] == true
+- if !cookies[:cart_logged_in].blank?
   :javascript
     $(document).ready(function(){
       $.ajax({
         type: "POST",
         url: '/course/cart/login',
-        data: "course_id=#{params[:course_id]}&cart_id=#{@cart_information}",
+        data: "course_pin=#{cookies[:cart_logged_in]}&cart_id=#{@cart_information}",
         context: $('#middle_canvas'),
         cache: false,
         success: function(r){
@@ -91,6 +91,12 @@
     });
 - else
   :javascript
+    function setCookie(c_name,value,exdays) {
+      var exdate=new Date();
+      exdate.setDate(exdate.getDate() + exdays);
+      var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+      document.cookie=c_name + "=" + c_value;
+    }
     $(document).ready(function(){
       $('.btnLogin').click(function(){
         $.ajax({
@@ -108,6 +114,7 @@
               });
               currentCourseId = r.result.id;
               currentCartId = r.cart.id;
+              setCookie("cart_logged_in", r.result.pin, 5);
             
               // Get Initial Summons
             
