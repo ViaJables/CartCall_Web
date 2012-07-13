@@ -1,6 +1,11 @@
+- if @summon.check_freshness > 180000
+  - display_warning = "block"
+- else
+  - display_warning = "none"
 #map_canvas.cart_canvas
 #bottom_canvas
   #explanation You are the orange dot, your customer is the blue dot
+  #explanation.warning{:style => "display: #{display_warning}"} It seems your customer hasn't given us a location recently, their last known location is being displayed.
   = link_to "Mark Completed & Return", serve_summon_path(@summon), :class => "btnStyle orange btnReturn", :id => "finish_summon"
 :javascript
   var currentSummonId;
@@ -27,7 +32,14 @@
           zoom: 15,
           // let's initially center on downtown Austin
           center: new google.maps.LatLng( 30.264664, -97.747378 ),
-          mapTypeId: google.maps.MapTypeId.ROADMAP
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          
+          zoomControlOptions: {
+                    style: google.maps.ZoomControlStyle.SMALL,
+                    position: google.maps.ControlPosition.LEFT_TOP
+                },
+          panControl: false,
+          streetViewControl: false
         },
         // then create the map
         map = new google.maps.Map( mapCanvas, map_options ),
@@ -140,6 +152,8 @@
           if (data.summon.id == #{@summon.id}){
             data = { "coords": { "latitude" : data.summon.latitude, "longitude" : data.summon.longitude }}
             displayCustomerLocation(data);
+            $('#explanation.warning').fadeOut(500);
+            setTimeout(function(){ $('#explanation.warning').fadeIn(500); }, 180000);
           }
         });
       

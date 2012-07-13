@@ -1,6 +1,6 @@
 class Summon < ActiveRecord::Base
   belongs_to :course
-  has_one :cart
+  belongs_to :cart
   
   #attributes
   attr_accessible :latitude, :longitude, :served, :on_my_way, :course, :cart_id, :cart
@@ -19,11 +19,18 @@ class Summon < ActiveRecord::Base
   end
   
   def accept(cart)
-    self.update_attributes(:on_my_way => Time.now, :cart_id => cart)
+    if self.cart.nil?
+      self.update_attributes(:on_my_way => Time.now, :cart_id => cart)
+    end
   end
   
   def serve
     self.update_attributes(:served => Time.now)
+  end
+  
+  def check_freshness
+    Time.zone = "UTC"
+    return ((Time.zone.now - self.updated_at) * 24 * 60 * 60).to_i
   end
   
   def send_cart_location

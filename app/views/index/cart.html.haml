@@ -197,7 +197,14 @@
           zoom: 15,
           // let's initially center on downtown Austin
           center: new google.maps.LatLng( 30.264664, -97.747378 ),
-          mapTypeId: google.maps.MapTypeId.ROADMAP
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          
+          zoomControlOptions: {
+                    style: google.maps.ZoomControlStyle.SMALL,
+                    position: google.maps.ControlPosition.LEFT_TOP
+                },
+          panControl: false,
+          streetViewControl: false
         },
         // then create the map
         map = new google.maps.Map( mapCanvas, map_options ),
