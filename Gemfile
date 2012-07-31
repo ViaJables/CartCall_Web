@@ -3,7 +3,8 @@ source 'https://rubygems.org'
 #### ACTIVE GEMS ####
 gem 'rails'
 gem "geocoder"
-gem 'capistrano'
+gem 'capistrano-ext'
+gem 'rvm-capistrano'
 gem 'jquery-rails'
 gem 'devise'
 gem 'pusher'
@@ -18,7 +19,7 @@ end
 
 group :production do
   # gems specifically for Heroku go here
-  gem 'pg'
+  gem 'mysql2'
 end
 
 
