@@ -111,12 +111,18 @@ class CourseController < ApplicationController
     cart_id = params[:cart_id]
     
     #check for values
-    course_pin.blank? || cart_id.blank? ? return : c = Course.find_by_pin(course_pin)
+    course_pin.blank? ? return : c = Course.find_by_pin(course_pin)
     
     #check cart for course information
-    cart = Cart.find(cart_id)
-    cart.course.nil? ? cart.update_attribute(:course, c) : true
-        
+    if !c.blank?
+      if !cart_id.blank?
+        cart = Cart.find(cart_id)
+        cart.course.nil? ? cart.update_attribute(:course, c) : true
+      else
+        cart = Cart.create(:course => c)
+      end
+    end
+    
     if c.blank?
       render :json => {:status => 'invalid_pin'}
     else
